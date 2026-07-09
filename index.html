@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloxd CSS Editor</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+
+    <div class="wallpaper"></div>
+
+    <!-- MENU -->
+    <div id="menu" class="everything visible">
+        <div class="group">
+
+        <button class="window" onclick="openPreset('HealthBar')">
+            <div class="Name">Health Bar</div>
+        </button>
+
+        <button class="window" onclick="openPreset('Hotbar')">
+            <div class="Name">Hotbar</div>
+        </button>
+
+        </div>
+    </div>
+
+    <!-- EDITOR PAGE -->
+    <div id="editorPage" class="editorPage hidden">
+
+        <div class="BackButtonContainer">
+            
+            <button class="button BackButton" onclick="goBack()">
+            ← Back
+        </button>
+
+        <div class="EverythingContainer">
+
+            <div id="EditorPage" class="Container"> 
+
+                <div class="MainAreaContainer">
+
+                    <div class="MiddleButtonContainer">
+
+                        <button class="button" id="PreviewBtn" onclick="viewEditor()">Preview</button>
+
+                        <button class="button" id="CodeBtn" onclick="viewCode()">Code</button>
+
+                    </div>
+
+                    <div class="ResultsContainer">
+
+                    <div class="PreviewContainer">
+                        <div class="preview" id="preview"></div>
+                    </div>
+
+                    <div class="editor">
+
+                    <div class="controls" id="controls"></div>
+
+                    <div class="buttons">
+                        <button class="button copyBtn">Copy</button>
+                        <button class="button downloadBtn">Download</button>
+                        <button class="button resetBtn">Reset</button>
+                    </div>
+
+                </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="CodePage" class="CodePage hidden">
+
+                <div class="MiddleButtonContainer">
+
+                    <button class="button" id="PreviewBtn" onclick="viewEditor()">Preview</button>
+
+                    <button class="button" id="CodeBtn" onclick="viewCode()">Code</button>
+
+                </div>
+
+                <textarea id="cssEditor"></textarea>
+
+                <div class="buttons">
+                        <button class="button copyBtn">Copy</button>
+                        <button class="button downloadBtn">Download</button>
+                        <button class="button resetBtn">Reset</button>
+                </div>
+                
+        </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Live CSS injection -->
+    <style id="liveStyle"></style>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

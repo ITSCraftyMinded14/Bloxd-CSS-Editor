@@ -1,0 +1,120 @@
+[
+  {
+    "group": "Layout:",
+    "selector": ".BottomScreenStatBarBackground",
+    "type": "slider",
+    "label": "Corner Radius",
+    "property": "border-radius",
+    "unit": "rem",
+    "min": 0,
+    "max": 2,
+    "step": 0.1,
+    "default": 1
+  },
+
+  {
+    "group": "Layout:",
+    "selector": ".BottomScreenStatBarWrapper",
+    "type": "slider",
+    "label": "Opacity",
+    "property": "opacity",
+    "unit": "",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 0.05,
+    "default": 0.9
+  },
+
+  {
+    "group": "Layout:",
+    "selector": ".BottomScreenStatBarBackground",
+    "type": "slider",
+    "label": "Width",
+    "property": "width",
+    "unit": "rem",
+    "min": 10,
+    "max": 20.5,
+    "step": 0.5,
+    "default": 13
+  },
+
+  {
+  "group": "Effects:",
+  "selector": ".HealthBar",
+  "type": "checkbox",
+  "id": "healthGradient",
+  "label": "Enable Gradient",
+  "property": "background-image",
+  "enabled": "linear-gradient(315deg, #ff0058 0%, #21a4fe 74%)",
+  "disabled": "none",
+  "default": true
+  },
+
+  {
+  "group": "Effects:",
+  "selector": ".ShieldBar",
+  "type": "checkbox",
+  "id": "shieldGradient",
+  "label": "Enable Shield Gradient",
+  "property": "background-image",
+  "enabled": "linear-gradient(315deg, #ffffff 0%, #ffb100 74%)",
+  "disabled": "none",
+  "default": true
+  },
+
+  {
+  "group": "Colors:",
+  "selector": ".HealthBar",
+  "type": "gradientColor",
+  "toggle": "healthGradient",
+  "label": "Gradient 1",
+  "property": "background-image",
+  "index": 0
+  },
+
+  {
+  "group": "Colors:",
+  "selector": ".HealthBar",
+  "type": "gradientColor",
+  "toggle": "healthGradient",
+  "label": "Gradient 2",
+  "property": "background-image",
+  "index": 1
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".ShieldBar",
+    "type": "gradientColor",
+    "toggle": "shieldGradient",
+    "label": "Shield Gradient 1",
+    "property": "background-image",
+    "index": 0
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".ShieldBar",
+    "toggle": "shieldGradient",
+    "type": "gradientColor",
+    "label": "Shield Gradient 2",
+    "property": "background-image",
+    "index": 1
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".BottomScreenStatBarBackground",
+    "type": "color",
+    "label": "Background Color",
+    "property": "background-color"
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".BottomScreenStatBarBackground",
+    "type": "color",
+    "label": "Border Color",
+    "property": "border-color"
+  }
+]
