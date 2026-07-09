@@ -95,7 +95,7 @@
   "selector": ".ShieldBar",
   "type": "color",
   "label": "Shield Base Color",
-  "property": "background-color",
+  "property": "background-color"
   },
 
   {
