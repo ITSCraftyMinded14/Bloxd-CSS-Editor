@@ -65,6 +65,14 @@
   {
   "group": "Colors:",
   "selector": ".HealthBar",
+  "type": "color",
+  "label": "Base Color",
+  "property": "background-color",
+  },
+
+  {
+  "group": "Colors:",
+  "selector": ".HealthBar",
   "type": "gradientColor",
   "toggle": "healthGradient",
   "label": "Gradient 1",
@@ -80,6 +88,14 @@
   "label": "Gradient 2",
   "property": "background-image",
   "index": 1
+  },
+
+  {
+  "group": "Colors:",
+  "selector": ".ShieldBar",
+  "type": "color",
+  "label": "Shield Base Color",
+  "property": "background-color",
   },
 
   {
