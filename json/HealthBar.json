@@ -67,7 +67,7 @@
   "selector": ".HealthBar",
   "type": "color",
   "label": "Base Color",
-  "property": "background-color",
+  "property": "background-color"
   },
 
   {
