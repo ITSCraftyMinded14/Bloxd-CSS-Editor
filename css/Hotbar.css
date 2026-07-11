@@ -1,0 +1,51 @@
+.HotBar {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.InvenItem.Selected {
+    background-image: url(https://iili.io/2irOU8J.png) !important;
+    background-repeat: no-repeat !important;
+    image-rendering: pixelated !important;
+    background-position: center !important;
+    background-size: cover !important;
+    background-color: #00000000 !important;
+    outline: 0px solid #00000000 !important;
+    border: 0px solid #00000000 !important;
+}
+
+.HotBarItem { /* Shop/Inventory */
+    background-image: url(https://iili.io/2irxiUx.png);
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-color: #00000000 !important;
+    border: 0.25rem solid #00000000 !important;
+    border-radius: 0 !important;
+    background-repeat: no-repeat !important;
+    image-rendering: pixelated !important;
+    background-size: cover !important;
+    outline: 0px solid #000 !important;
+    opacity: 0.75 !important;
+}
+
+.InvenItem {
+    background-image: url(https://iili.io/2irxiUx.png);
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-color: #00000000 !important;
+    border: 0rem solid #00000000 !important;
+    border-radius: 0 !important;
+    background-repeat: no-repeat !important;
+    image-rendering: pixelated !important;
+    background-size: cover !important;
+    outline: 0px solid #000 !important;
+    width: 3.7rem;
+    height: 3.7rem;
+}
+
+.HotbarItemNumber {
+    font-size: 0rem !important;
+    top: 0rem !important;
+    width: 0% !important;
+    height: 0% !important;
+}
