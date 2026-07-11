@@ -270,8 +270,7 @@ textarea {
     height: auto;
     width: 100%;
     position: relative;
-    left: 5px;
-    max-width: 100%;
+    max-width: 18rem;
     margin-top: 5px;
     padding: 0.4rem;
     border: 1px solid #00000040;
