@@ -96,8 +96,15 @@ function buildControls(config) {
 
     config.forEach(control => {
         let element;
-        
-        const regex = new RegExp(`${control.selector.replace('.', '\\.')}\\s*{[^}]*${control.property}:\\s*([\\d\\.]+|#[0-9a-fA-F]{3,8})`);
+        let regex = null;
+
+        if (control.type === "image") {
+            const selectorEscaped = escapeRegExp(control.selector || "");
+            regex = new RegExp(`${selectorEscaped}\\s*\\{([^}]*)}`);
+        } else if (control.type === "slider" || control.type === "color" || control.type === "gradientColor") {
+            const selectorEscaped = escapeRegExp(control.selector || "");
+            regex = new RegExp(`${selectorEscaped}\\s*\\{[^}]*${control.property}:\\s*([\\d\\.]+|#[0-9a-fA-F]{3,8})`);
+        }
         console.log(control.type, control.label);
 
         if (control.type === "slider") {
@@ -106,12 +113,14 @@ function buildControls(config) {
             element = createColorPicker(control, regex);
         } else if (control.type === "gradientColor") {
             element = createGradientColorPicker(control, regex);
-        }
-          else if (control.type === "checkbox") {
+        } else if (control.type === "image") {
+            element = createImageInput(control, regex);
+        } else if (control.type === "link") {
+            element = createLinkControl(control);
+        } else if (control.type === "checkbox") {
             element = createCheckbox(control);
         }
 
-        // Add to Group
         const groupName = control.group || "General";
         if (!groups[groupName]) {
             groups[groupName] = new ControlGroup(groupName);
@@ -119,6 +128,63 @@ function buildControls(config) {
         }
         groups[groupName].addControl(element);
     });
+}
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeImageValue(value) {
+    let current = value.trim().replace(/\s*!important\s*$/i, "").trim();
+    const urlMatch = current.match(/^url\((.*)\)$/i);
+
+    if (urlMatch) {
+        current = urlMatch[1].trim();
+        if ((current.startsWith('"') && current.endsWith('"')) || (current.startsWith("'") && current.endsWith("'"))) {
+            current = current.slice(1, -1);
+        }
+    }
+
+    return current;
+}
+
+function formatImageValue(value, unit) {
+    if (unit === "url") {
+        const trimmed = value.trim();
+        if (!trimmed) return "none";
+
+        let inner = normalizeImageValue(trimmed);
+        inner = inner.replace(/^['"]|['"]$/g, "");
+        return `url("${inner}")`;
+    }
+
+    return value;
+}
+
+function extractImageUrl(value) {
+    return normalizeImageValue(value);
+}
+
+function createLinkControl(control) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "LinkControl";
+
+    if (control.label) {
+        const label = document.createElement("span");
+        label.className = "LinkControlLabel";
+        label.textContent = control.label;
+        wrapper.appendChild(label);
+    }
+
+    const link = document.createElement("a");
+    link.className = "LinkControlButton";
+    link.href = control.link || "#";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = control.text || control.label || "Open link";
+    wrapper.appendChild(link);
+
+    return wrapper;
 }
 
 function createCheckbox(control) {
@@ -137,10 +203,8 @@ function createCheckbox(control) {
 
     wrapper.append(input, checkmark, text);
 
-    // Initial state
     input.checked = control.default ?? true;
 
-    // Apply initial CSS
     updateToggle(control, input.checked);
 
     input.addEventListener("change", () => {
@@ -190,7 +254,6 @@ function updateToggle(control, enabled) {
 
     liveStyle.textContent = editor.value;
 
-    // Enable/disable linked controls
     allControls.forEach(item => {
 
         if (item.control.toggle === control.id) {
@@ -274,19 +337,25 @@ function syncControlsFromCSS() {
     }
 }
         else if (type === 'color') {
-            const match = editor.value.match(regex);
-            if (match && match[1]) {
-                item.picker.value = match[1].slice(0, 7);
-            }
+    const match = editor.value.match(item.regex);
+    if (match && match[1]) {
+        let hex = match[1];
+        
+        if (hex.length === 4) {
+            hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
         }
+        item.picker.value = hex.slice(0, 7); 
+    }
+}
         else if (type === "checkbox") {
+    const valToMatch = control.value || ""; 
+    
+    const regex = new RegExp(
+        `${control.property}:\\s*${valToMatch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`
+    );
 
-            const regex = new RegExp(
-            `${control.property}:\\s*${control.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
-
-            input.checked = regex.test(editor.value);
-
-        }
+    input.checked = regex.test(editor.value);
+}
         else if (type === 'gradientColor') {
             const selectorEscaped = control.selector.replace('.', '\\.');
             const blockRegex = new RegExp(`${selectorEscaped}\\s*{([^}]*)}`);
@@ -301,6 +370,21 @@ function syncControlsFromCSS() {
                     item.picker.value = (colors[control.index] || control.default || '#ffffff').slice(0, 7);
                 }
             }
+        } else if (type === 'image') {
+            let current = "";
+            const match = editor.value.match(item.regex);
+
+            if (match && match[1]) {
+                const blockBody = match[1];
+                const propertyMatch = blockBody.match(new RegExp(`${control.property}:\\s*([^;]+)`));
+                current = propertyMatch ? propertyMatch[1].trim() : "";
+            }
+
+            if (control.unit === "url") {
+                current = extractImageUrl(current);
+            }
+
+            item.textarea.value = current;
         }
     });
 }
@@ -393,6 +477,54 @@ function createColorPicker(control, regex) {
     return wrapper;
 }
 
+function createImageInput(control, regex) {
+    const wrapper = document.createElement("div");
+    const label = document.createElement("label");
+    label.textContent = control.label;
+    wrapper.appendChild(label);
+
+    const textarea = document.createElement("textarea");
+    textarea.className = "ImageInput";
+    textarea.rows = 1;
+    textarea.placeholder = control.unit === "url" ? "Enter image URL" : "Enter value";
+
+    let current = "";
+    if (regex) {
+        const match = editor.value.match(regex);
+        if (match && match[1]) {
+            const blockBody = match[1];
+            const propertyMatch = blockBody.match(new RegExp(`${control.property}:\\s*([^;]+)`));
+            current = propertyMatch ? propertyMatch[1].trim() : "";
+        }
+    }
+
+    if (control.unit === "url") {
+        current = extractImageUrl(current);
+    }
+
+    textarea.value = current;
+
+    textarea.addEventListener("input", () => {
+        const newValue = formatImageValue(textarea.value, control.unit);
+        const replaceRegex = new RegExp(`(${escapeRegExp(control.selector)}\\s*{[\\s\\S]*?${control.property}:\\s*)([^;]*?)(\\s*!important)?\\s*;`);
+
+        if (replaceRegex.test(editor.value)) {
+            editor.value = editor.value.replace(replaceRegex, `$1${newValue}$3;`);
+        } else {
+            const selectorRegex = new RegExp(`(${escapeRegExp(control.selector)}\\s*{)`);
+            editor.value = editor.value.replace(selectorRegex, `$1\n    ${control.property}: ${newValue} !important;`);
+        }
+
+        liveStyle.textContent = editor.value;
+    });
+
+    allControls.push({ type: 'image', control, textarea, regex });
+
+    wrapper.appendChild(textarea);
+    controls.appendChild(wrapper);
+    return wrapper;
+}
+
 /* BUTTON ACTIONS */
 
 function getActiveEditorValue() {
@@ -425,7 +557,6 @@ function Reset() {
     editor.value = originalCSS;
     liveStyle.textContent = originalCSS;
 
-    // Force an immediate sync after the reset
     syncControlsFromCSS();
 };
 
