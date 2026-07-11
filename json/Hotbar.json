@@ -18,6 +18,15 @@
 
   {
   "group": "Layout:",
+  "selector": ".HotBarItem",
+  "type": "image",
+  "label": "Shop/Inven",
+  "property": "background-image",
+  "unit": "url"
+  },
+
+  {
+  "group": "Layout:",
   "selector": ".InvenItem",
   "type": "image",
   "label": "Normal",
