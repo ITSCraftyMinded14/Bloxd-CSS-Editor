@@ -1,0 +1,24 @@
+.AuraBarBackground {
+    background-image: linear-gradient(200deg, #00bcf5d1 0%, #bf179bd6 75%) !important;
+    background-color: #35c961 !important;
+}
+
+.AuraBar {
+    background-color: #00000052 !important;
+    border: solid !important;
+    border-color: #000000 !important;
+    border-radius: 1rem !important;
+    border-width: 1px !important;
+}
+
+.AuraBarWrapper {
+    opacity: 1 !important;
+    width: 41rem !important;
+    height: 1rem !important;
+}
+
+.AuraBarLabel {
+    height: 100%;
+    top: 0rem !important;
+    transform: none !important;
+}

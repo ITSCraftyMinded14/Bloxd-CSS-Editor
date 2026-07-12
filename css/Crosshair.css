@@ -1,0 +1,11 @@
+.Crosshair {
+    align-items: center !important;
+    background-image: url(https://iili.io/2sByfst.png) !important;
+    font-size: 1.3rem !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    color: #00000000 !important;
+    text-shadow: none !important;
+    translate: -50% -40% !important;
+}

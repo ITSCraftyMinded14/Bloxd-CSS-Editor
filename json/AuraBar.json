@@ -1,0 +1,121 @@
+[
+  {
+    "group": "Layout:",
+    "selector": ".AuraBarWrapper",
+    "type": "slider",
+    "label": "Opacity",
+    "property": "opacity",
+    "unit": "",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 0.05
+  },
+
+  {
+    "group": "Layout:",
+    "selector": ".AuraBar",
+    "type": "slider",
+    "label": "Border size",
+    "property": "border-width",
+    "unit": "px",
+    "min": 0,
+    "max": 4,
+    "step": 1
+  },
+
+  {
+    "group": "Layout:",
+    "selector": ".AuraBar",
+    "type": "slider",
+    "label": "Corner Radius",
+    "property": "border-radius",
+    "unit": "rem",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 0.1
+  },
+
+  {
+    "group": "Layout:",
+    "selector": ".AuraBarWrapper",
+    "type": "slider",
+    "label": "Height",
+    "property": "height",
+    "unit": "rem",
+    "min": 0.5,
+    "max": 2.0,
+    "step": 0.1
+  },
+
+  {
+  "group": "Effects:",
+  "selector": ".AuraBarBackground",
+  "type": "checkbox",
+  "id": "auraGradient",
+  "label": "Enable Gradient",
+  "property": "background-image",
+  "enabled": "linear-gradient(200deg, #00bcf5d1 0%, #bf179bd6 75%)",
+  "disabled": "none",
+  "default": true
+  },
+
+  {
+  "group": "Colors:",
+  "selector": ".AuraBarBackground",
+  "type": "gradientColor",
+  "toggle": "auraGradient",
+  "label": "Gradient 1",
+  "property": "background-image",
+  "index": 0
+  },
+
+  {
+  "group": "Colors:",
+  "selector": ".AuraBarBackground",
+  "type": "gradientColor",
+  "toggle": "auraGradient",
+  "label": "Gradient 2",
+  "property": "background-image",
+  "index": 1
+  },
+
+  {
+  "group": "Colors:",
+  "selector": ".AuraBarBackground",
+  "type": "color",
+  "label": "Base Color",
+  "property": "background-color"
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".AuraBar",
+    "type": "color",
+    "label": "Background Color",
+    "property": "background-color"
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".AuraBar",
+    "type": "color-opacity",
+    "label": "Opacity",
+    "property": "background-color"
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".AuraBar",
+    "type": "color",
+    "label": "Border Color",
+    "property": "border-color"
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".AuraBar",
+    "type": "color-opacity",
+    "label": "Opacity",
+    "property": "border-color"
+  }
+]
