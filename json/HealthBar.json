@@ -129,8 +129,24 @@
   {
     "group": "Back Colors:",
     "selector": ".BottomScreenStatBarBackground",
+    "type": "color-opacity",
+    "label": "Opacity",
+    "property": "background-color"
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".BottomScreenStatBarBackground",
     "type": "color",
     "label": "Border Color",
+    "property": "border-color"
+  },
+
+  {
+    "group": "Back Colors:",
+    "selector": ".BottomScreenStatBarBackground",
+    "type": "color-opacity",
+    "label": "Opacity",
     "property": "border-color"
   }
 ]

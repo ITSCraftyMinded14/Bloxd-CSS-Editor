@@ -104,6 +104,9 @@ function buildControls(config) {
         } else if (control.type === "slider" || control.type === "color" || control.type === "gradientColor") {
             const selectorEscaped = escapeRegExp(control.selector || "");
             regex = new RegExp(`${selectorEscaped}\\s*\\{[^}]*${control.property}:\\s*([\\d\\.]+|#[0-9a-fA-F]{3,8})`);
+        } else if (control.type === "color-opacity") {
+            const selectorEscaped = escapeRegExp(control.selector || "");
+            regex = new RegExp(`${selectorEscaped}\\s*\\{[^}]*${control.property}:\\s*([^;]+)`);
         }
         console.log(control.type, control.label);
 
@@ -113,6 +116,8 @@ function buildControls(config) {
             element = createColorPicker(control, regex);
         } else if (control.type === "gradientColor") {
             element = createGradientColorPicker(control, regex);
+        } else if (control.type === "color-opacity") {
+            element = createColorOpacityControl(control, regex);
         } else if (control.type === "image") {
             element = createImageInput(control, regex);
         } else if (control.type === "link") {
@@ -184,6 +189,117 @@ function createLinkControl(control) {
     link.textContent = control.text || control.label || "Open link";
     wrapper.appendChild(link);
 
+    return wrapper;
+}
+
+function parseOpacityFromColorValue(value) {
+    const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
+    if (!trimmed) return 100;
+
+    const rgbaMatch = trimmed.match(/^rgba?\(([^)]+)\)$/i);
+    if (rgbaMatch) {
+        const parts = rgbaMatch[1].split(",").map(part => part.trim());
+        if (parts.length >= 4) {
+            const alpha = parseFloat(parts[3]);
+            if (!Number.isNaN(alpha)) {
+                return Math.round(Math.max(0, Math.min(1, alpha)) * 100);
+            }
+        }
+        return 100;
+    }
+
+    const hexMatch = trimmed.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+    if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3 || hex.length === 4) {
+            hex = hex.split("").map(ch => ch + ch).join("");
+        }
+
+        if (hex.length === 8) {
+            const alphaHex = hex.slice(6, 8);
+            const alpha = parseInt(alphaHex, 16);
+            return Math.round((alpha / 255) * 100);
+        }
+    }
+
+    return 100;
+}
+
+function buildColorWithOpacity(value, opacityPercent) {
+    const num = Number(opacityPercent);
+    const opacity = Math.max(
+    0,
+    Math.min(100, Number.isNaN(num) ? 100 : num)
+    );
+    const alphaHex = Math.round((opacity / 100) * 255).toString(16).padStart(2, "0");
+    const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
+
+    const rgbaMatch = trimmed.match(/^rgba?\(([^)]+)\)$/i);
+    if (rgbaMatch) {
+        const parts = rgbaMatch[1].split(",").map(part => part.trim());
+        if (parts.length >= 3) {
+            const r = parseInt(parts[0], 10).toString(16).padStart(2, "0");
+            const g = parseInt(parts[1], 10).toString(16).padStart(2, "0");
+            const b = parseInt(parts[2], 10).toString(16).padStart(2, "0");
+            return `#${r}${g}${b}${alphaHex}`;
+        }
+    }
+
+    const hexMatch = trimmed.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+    if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3 || hex.length === 4) {
+            hex = hex.split("").map(ch => ch + ch).join("");
+        }
+
+        if (hex.length === 6 || hex.length === 8) {
+            const base = hex.slice(0, 6);
+            return `#${base}${alphaHex}`;
+        }
+    }
+
+    return trimmed;
+}
+
+function createColorOpacityControl(control, regex) {
+    const wrapper = document.createElement("div");
+    const label = document.createElement("label");
+    label.textContent = control.label;
+    wrapper.appendChild(label);
+
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = 0;
+    slider.max = 100;
+    slider.step = 1;
+
+    const match = editor.value.match(regex);
+    const currentValue = match && match[1] ? match[1].trim() : "";
+    slider.value = parseOpacityFromColorValue(currentValue);
+
+    const valueLabel = document.createElement("span");
+    valueLabel.textContent = `${slider.value}%`;
+
+    slider.addEventListener("input", () => {
+        const match = editor.value.match(regex);
+        const currentValue = match && match[1] ? match[1].trim() : "";
+        const nextValue = buildColorWithOpacity(currentValue, slider.value);
+
+        if (!currentValue) return;
+
+        const propertyRegex = new RegExp(`(${escapeRegExp(control.selector)}\\s*\\{[^}]*?${escapeRegExp(control.property)}:\\s*)([^;]+?)(\\s*!important)?\\s*;`, "i");
+        editor.value = editor.value.replace(propertyRegex, (fullMatch, prefix, existingValue, importantFlag) => {
+            return `${prefix}${nextValue}${importantFlag || ""};`;
+        });
+        valueLabel.textContent = `${slider.value}%`;
+        liveStyle.textContent = editor.value;
+    });
+
+    allControls.push({ type: "color-opacity", control, slider, valueLabel, regex });
+
+    wrapper.appendChild(slider);
+    wrapper.appendChild(valueLabel);
+    controls.appendChild(wrapper);
     return wrapper;
 }
 
@@ -347,6 +463,15 @@ function syncControlsFromCSS() {
         item.picker.value = hex.slice(0, 7); 
     }
 }
+        else if (type === 'color-opacity') {
+    const match = editor.value.match(item.regex);
+    if (match && match[1]) {
+        slider.value = parseOpacityFromColorValue(match[1]);
+        if (valueLabel) {
+            valueLabel.textContent = `${slider.value}%`;
+        }
+    }
+}
         else if (type === "checkbox") {
     const valToMatch = control.value || ""; 
     
@@ -425,17 +550,28 @@ function createGradientColorPicker(control, regex) {
     });
 
     picker.addEventListener("input", () => {
-        let currentLine = getPropertyLine();
-        if (!currentLine) return;
+    let currentLine = getPropertyLine();
+    if (!currentLine) return;
 
-        let colors = currentLine.match(/#[0-9a-fA-F]{3,8}/g) || [];
-        colors[control.index] = picker.value;
+    let colors = currentLine.match(/#[0-9a-fA-F]{3,8}/g) || [];
 
-        let i = 0;
-        const updatedLine = currentLine.replace(/#[0-9a-fA-F]{3,8}/g, () => colors[i++]);
+    const oldColor = colors[control.index] || "#ffffff";
 
-        editor.value = editor.value.replace(currentLine, updatedLine);
-        liveStyle.textContent = editor.value;
+    let alpha = "";
+    if (oldColor.length === 9) {
+        alpha = oldColor.slice(7, 9);
+    }
+
+    colors[control.index] = picker.value + alpha;
+
+    let i = 0;
+    const updatedLine = currentLine.replace(
+        /#[0-9a-fA-F]{3,8}/g,
+        () => colors[i++]
+    );
+
+    editor.value = editor.value.replace(currentLine, updatedLine);
+    liveStyle.textContent = editor.value;
     });
 
     wrapper.appendChild(label);
@@ -443,7 +579,7 @@ function createGradientColorPicker(control, regex) {
     controls.appendChild(wrapper);
 
     return wrapper;
-}
+    }
 
 function createColorPicker(control, regex) {
     const wrapper = document.createElement("div");
@@ -467,9 +603,22 @@ function createColorPicker(control, regex) {
     if (match && match[1]) picker.value = match[1].slice(0, 7);
 
     picker.addEventListener("input", () => {
-        const replaceRegex = new RegExp(`(${control.selector.replace('.', '\\.')}\\s*{[^}]*${control.property}:\\s*)(#[0-9a-fA-F]{3,8})`);
-        editor.value = editor.value.replace(replaceRegex, `$1${picker.value}`);
-        liveStyle.textContent = editor.value;
+    const replaceRegex = new RegExp(
+        `(${control.selector.replace('.', '\\.')}\\s*{[^}]*${control.property}:\\s*)(#[0-9a-fA-F]{3,8})`
+    );
+
+    editor.value = editor.value.replace(replaceRegex, (match, prefix, oldColor) => {
+
+        let alpha = "";
+
+        if (oldColor.length === 9) {
+            alpha = oldColor.slice(7, 9);
+        }
+
+        return `${prefix}${picker.value}${alpha}`;
+    });
+
+    liveStyle.textContent = editor.value;
     });
 
     wrapper.appendChild(picker);
