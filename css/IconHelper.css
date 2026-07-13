@@ -1,0 +1,14 @@
+.IconKeyboardButtonHelper {
+    color: #ffffff !important;
+}
+
+.KeyboardButtonRepresentation {
+    display: block !important;
+    background-color: #00000030 !important;
+    border: solid !important;
+    border-width: 1px !important;
+    border-color: #ffffff !important;
+    border-radius: .5rem !important;
+    box-shadow: 0 .2em 0 #ffffff5e !important;
+    text-shadow: 0 0 transparent !important;
+}

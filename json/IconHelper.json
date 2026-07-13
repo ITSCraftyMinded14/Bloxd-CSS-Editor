@@ -1,0 +1,61 @@
+[
+  {
+  "group": "Layout:",
+  "selector": ".KeyboardButtonRepresentation",
+  "type": "checkbox",
+  "id": "iconHelper",
+  "label": "Show Badges",
+  "property": "display",
+  "enabled": "flex",
+  "disabled": "none",
+  "default": true
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".KeyboardButtonRepresentation",
+    "type": "color",
+    "label": "Background Color",
+    "property": "background-color"
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".KeyboardButtonRepresentation",
+    "type": "color-opacity",
+    "label": "Opacity",
+    "property": "background-color"
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".KeyboardButtonRepresentation",
+    "type": "color",
+    "label": "Border Color",
+    "property": "border-color"
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".KeyboardButtonRepresentation",
+    "type": "color-opacity",
+    "label": "Opacity",
+    "property": "border-color"
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".KeyboardButtonRepresentation",
+    "type": "color-shadow",
+    "label": "Shadow Color",
+    "property": "box-shadow"
+  },
+
+  {
+    "group": "Colors:",
+    "selector": ".KeyboardButtonRepresentation",
+    "type": "color-opacity",
+    "label": "Opacity",
+    "property": "box-shadow"
+  }
+]

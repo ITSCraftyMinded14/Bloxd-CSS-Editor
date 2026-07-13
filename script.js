@@ -104,9 +104,9 @@ function buildControls(config) {
         } else if (control.type === "slider" || control.type === "color" || control.type === "gradientColor") {
             const selectorEscaped = escapeRegExp(control.selector || "");
             regex = new RegExp(`${selectorEscaped}\\s*\\{[^}]*${control.property}:\\s*([\\d\\.]+|#[0-9a-fA-F]{3,8})`);
-        } else if (control.type === "color-opacity") {
+        } else if (control.type === "color-opacity" || control.type === "color-shadow") {
             const selectorEscaped = escapeRegExp(control.selector || "");
-            regex = new RegExp(`${selectorEscaped}\\s*\\{[^}]*${control.property}:\\s*([^;]+)`);
+            regex = new RegExp(`${selectorEscaped}\\s*\\{[^}]*${escapeRegExp(control.property)}:\\s*([^;]+)`);
         }
         console.log(control.type, control.label);
 
@@ -118,6 +118,8 @@ function buildControls(config) {
             element = createGradientColorPicker(control, regex);
         } else if (control.type === "color-opacity") {
             element = createColorOpacityControl(control, regex);
+        } else if (control.type === "color-shadow") {
+            element = createColorShadowControl(control, regex);
         } else if (control.type === "image") {
             element = createImageInput(control, regex);
         } else if (control.type === "link") {
@@ -196,7 +198,10 @@ function parseOpacityFromColorValue(value) {
     const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
     if (!trimmed) return 100;
 
-    const rgbaMatch = trimmed.match(/^rgba?\(([^)]+)\)$/i);
+    const colorMatch = trimmed.match(/(rgba?\([^)]*\)|hsla?\([^)]*\)|#[0-9a-fA-F]{3,4}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8})/i);
+    const colorValue = colorMatch ? colorMatch[1] : trimmed;
+
+    const rgbaMatch = colorValue.match(/^rgba?\(([^)]+)\)$/i);
     if (rgbaMatch) {
         const parts = rgbaMatch[1].split(",").map(part => part.trim());
         if (parts.length >= 4) {
@@ -208,7 +213,7 @@ function parseOpacityFromColorValue(value) {
         return 100;
     }
 
-    const hexMatch = trimmed.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+    const hexMatch = colorValue.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
     if (hexMatch) {
         let hex = hexMatch[1];
         if (hex.length === 3 || hex.length === 4) {
@@ -234,7 +239,10 @@ function buildColorWithOpacity(value, opacityPercent) {
     const alphaHex = Math.round((opacity / 100) * 255).toString(16).padStart(2, "0");
     const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
 
-    const rgbaMatch = trimmed.match(/^rgba?\(([^)]+)\)$/i);
+    const colorMatch = trimmed.match(/(rgba?\([^)]*\)|hsla?\([^)]*\)|#[0-9a-fA-F]{3,4}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8})/i);
+    const colorValue = colorMatch ? colorMatch[1] : trimmed;
+
+    const rgbaMatch = colorValue.match(/^rgba?\(([^)]+)\)$/i);
     if (rgbaMatch) {
         const parts = rgbaMatch[1].split(",").map(part => part.trim());
         if (parts.length >= 3) {
@@ -245,7 +253,7 @@ function buildColorWithOpacity(value, opacityPercent) {
         }
     }
 
-    const hexMatch = trimmed.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+    const hexMatch = colorValue.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
     if (hexMatch) {
         let hex = hexMatch[1];
         if (hex.length === 3 || hex.length === 4) {
@@ -259,6 +267,79 @@ function buildColorWithOpacity(value, opacityPercent) {
     }
 
     return trimmed;
+}
+
+function updateOpacityInValue(value, opacityPercent) {
+    const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
+    if (!trimmed || trimmed.toLowerCase() === "none") return trimmed;
+
+    const colorMatch = trimmed.match(/^(rgba?\([^)]*\)|hsla?\([^)]*\)|#[0-9a-fA-F]{3,4}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8})$/i);
+    if (!colorMatch) return trimmed;
+
+    return buildColorWithOpacity(colorMatch[1], opacityPercent);
+}
+
+function updateOpacityInBoxShadowValue(value, opacityPercent) {
+    const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
+    if (!trimmed || trimmed.toLowerCase() === "none") return trimmed;
+
+    return trimmed.split(",").map(part => part.trim()).filter(Boolean).map(part => {
+        const colorMatch = part.match(/(rgba?\([^)]*\)|hsla?\([^)]*\)|#[0-9a-fA-F]{3,4}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8})\s*$/i);
+        if (!colorMatch) return part;
+
+        const colorToken = colorMatch[1];
+        const nextColor = buildColorWithOpacity(colorToken, opacityPercent);
+        return part.replace(colorToken, nextColor);
+    }).join(", ");
+}
+
+function normalizeColorInputValue(value) {
+    const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
+    const hexMatch = trimmed.match(/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/i);
+
+    if (!hexMatch) return "#ffffff";
+
+    let hex = hexMatch[1];
+    if (hex.length === 3 || hex.length === 4) {
+        hex = hex.split("").map(ch => ch + ch).join("");
+    }
+
+    return `#${hex.slice(0, 6)}`;
+}
+
+function getBoxShadowColorToken(value) {
+    const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
+    if (!trimmed || trimmed.toLowerCase() === "none") return "";
+
+    const shadowParts = trimmed.split(",").map(part => part.trim()).filter(Boolean);
+
+    for (const shadowPart of shadowParts) {
+        const match = shadowPart.match(/(rgba?\([^)]*\)|hsla?\([^)]*\)|#[0-9a-fA-F]{3,4}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8})\s*$/i);
+        if (match) return match[1];
+    }
+
+    return "";
+}
+
+function replaceBoxShadowColorValue(value, newColor) {
+    const trimmed = (value || "").trim().replace(/\s*!important\s*$/i, "").trim();
+    if (!trimmed || trimmed.toLowerCase() === "none") return trimmed;
+
+    const shadowParts = trimmed.split(",").map(part => part.trim()).filter(Boolean);
+
+    return shadowParts.map(part => {
+        const match = part.match(/(rgba?\([^)]*\)|hsla?\([^)]*\)|#[0-9a-fA-F]{3,4}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8})\s*$/i);
+        if (!match) return part;
+
+        const oldColor = match[1];
+        let alpha = "";
+
+        if (oldColor.startsWith("#") && oldColor.length === 9) {
+            alpha = oldColor.slice(7, 9);
+        }
+
+        return part.replace(oldColor, `${newColor}${alpha}`);
+    }).join(", ");
 }
 
 function createColorOpacityControl(control, regex) {
@@ -283,10 +364,12 @@ function createColorOpacityControl(control, regex) {
     slider.addEventListener("input", () => {
         const match = editor.value.match(regex);
         const currentValue = match && match[1] ? match[1].trim() : "";
-        const nextValue = buildColorWithOpacity(currentValue, slider.value);
 
         if (!currentValue) return;
 
+        const nextValue = control.property.toLowerCase() === "box-shadow"
+            ? updateOpacityInBoxShadowValue(currentValue, slider.value)
+            : updateOpacityInValue(currentValue, slider.value);
         const propertyRegex = new RegExp(`(${escapeRegExp(control.selector)}\\s*\\{[^}]*?${escapeRegExp(control.property)}:\\s*)([^;]+?)(\\s*!important)?\\s*;`, "i");
         editor.value = editor.value.replace(propertyRegex, (fullMatch, prefix, existingValue, importantFlag) => {
             return `${prefix}${nextValue}${importantFlag || ""};`;
@@ -299,6 +382,44 @@ function createColorOpacityControl(control, regex) {
 
     wrapper.appendChild(slider);
     wrapper.appendChild(valueLabel);
+    controls.appendChild(wrapper);
+    return wrapper;
+}
+
+function createColorShadowControl(control, regex) {
+    const wrapper = document.createElement("div");
+    const label = document.createElement("label");
+    label.textContent = control.label;
+    wrapper.appendChild(label);
+
+    const picker = document.createElement("input");
+    picker.type = "color";
+
+    const match = editor.value.match(regex);
+    const currentValue = match && match[1] ? match[1].trim() : "";
+    const currentColor = getBoxShadowColorToken(currentValue);
+    if (currentColor) {
+        picker.value = normalizeColorInputValue(currentColor);
+    }
+
+    picker.addEventListener("input", () => {
+        const match = editor.value.match(regex);
+        const currentValue = match && match[1] ? match[1].trim() : "";
+
+        if (!currentValue) return;
+
+        const nextValue = replaceBoxShadowColorValue(currentValue, picker.value);
+        const propertyRegex = new RegExp(`(${escapeRegExp(control.selector)}\\s*\\{[^}]*?${escapeRegExp(control.property)}:\\s*)([^;]+?)(\\s*!important)?\\s*;`, "i");
+
+        editor.value = editor.value.replace(propertyRegex, (fullMatch, prefix, existingValue, importantFlag) => {
+            return `${prefix}${nextValue}${importantFlag || ""};`;
+        });
+        liveStyle.textContent = editor.value;
+    });
+
+    allControls.push({ type: "color-shadow", control, picker, regex });
+
+    wrapper.appendChild(picker);
     controls.appendChild(wrapper);
     return wrapper;
 }
@@ -472,6 +593,15 @@ function syncControlsFromCSS() {
         }
     }
 }
+        else if (type === 'color-shadow') {
+    const match = editor.value.match(item.regex);
+    if (match && match[1]) {
+        const shadowColor = getBoxShadowColorToken(match[1]);
+        if (shadowColor) {
+            item.picker.value = normalizeColorInputValue(shadowColor);
+        }
+    }
+}
         else if (type === "checkbox") {
     const valToMatch = control.value || ""; 
     
@@ -579,7 +709,7 @@ function createGradientColorPicker(control, regex) {
     controls.appendChild(wrapper);
 
     return wrapper;
-    }
+}
 
 function createColorPicker(control, regex) {
     const wrapper = document.createElement("div");
