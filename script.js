@@ -72,9 +72,9 @@ let originalCSS = "";
 
 async function loadPreset(name) {
 
-    const htmlResponse = await fetch(`components/${name}.html`);
-    const cssResponse = await fetch(`css/${name}.css`);
-    const jsonResponse = await fetch(`json/${name}.json`);
+    const htmlResponse = await fetch(`https://cdn.jsdelivr.net/gh/ITSCraftyMinded14/Bloxd-CSS-Editor@latest/components/${name}.html`);
+    const cssResponse = await fetch(`https://cdn.jsdelivr.net/gh/ITSCraftyMinded14/Bloxd-CSS-Editor@latest/css/${name}.css`);
+    const jsonResponse = await fetch(`https://cdn.jsdelivr.net/gh/ITSCraftyMinded14/Bloxd-CSS-Editor@latest/json/${name}.json`);
     const html = await htmlResponse.text();
     const css = await cssResponse.text();
     const config = await jsonResponse.json();
