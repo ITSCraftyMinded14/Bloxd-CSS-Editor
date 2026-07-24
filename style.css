@@ -155,10 +155,11 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    height: stretch;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
     position: relative;
+    overflow: hidden;
 }
 
 .controls {
@@ -314,6 +315,8 @@ textarea {
 }
 
 .window {
+    flex-direction: column;
+    display: flex;
     width: 16rem;
     height: 12rem;
     background-color: #00000052;
