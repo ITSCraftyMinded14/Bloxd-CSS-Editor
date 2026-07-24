@@ -1,0 +1,17 @@
+.LogoLoaderInner {
+    opacity: 0 !important;
+    height: 0px !important;
+    width: 0px !important;
+}
+
+.LogoLoader {
+    border: none !important;
+    border-radius: 100% !important;
+    background-image: url(https://iili.io/CTha8tj.png);
+    background-size: contain !important;
+}
+
+.LogoLoaderLoadingBar {
+    border: none !important;
+    border-radius: 100% !important;
+}
