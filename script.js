@@ -72,9 +72,9 @@ let originalCSS = "";
 
 async function loadPreset(name) {
 
-    const htmlResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@d663a442ed322c02b76c3b7e87a7c72c875e8daf/components/${name}.html`);
-    const cssResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@d663a442ed322c02b76c3b7e87a7c72c875e8daf/css/${name}.css`);
-    const jsonResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@d663a442ed322c02b76c3b7e87a7c72c875e8daf/json/${name}.json`);
+    const htmlResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@1483791c5d842c6930a6c014de795d80bee7eae3/components/${name}.html`);
+    const cssResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@1483791c5d842c6930a6c014de795d80bee7eae3/css/${name}.css`);
+    const jsonResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@1483791c5d842c6930a6c014de795d80bee7eae3/json/${name}.json`);
     const html = await htmlResponse.text();
     const css = await cssResponse.text();
     const config = await jsonResponse.json();
