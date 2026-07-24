@@ -523,6 +523,61 @@ function enforceDefault(control) {
     }
 }
 
+function getSliderUnit(control) {
+    if (control.unit) return control.unit;
+    if (control.filter === "hue-rotate") return "deg";
+    if (control.filter === "blur") return "px";
+    return "";
+}
+
+function getSliderValueFromCSS(control, cssText = editor.value) {
+    const selectorEscaped = escapeRegExp(control.selector || "");
+    const selectorRegex = new RegExp(`${selectorEscaped}\\s*\\{([^}]*)}`, "i");
+    const blockMatch = cssText.match(selectorRegex);
+
+    if (!blockMatch) return control.default || 0;
+
+    const block = blockMatch[1];
+    const propertyRegex = new RegExp(`${escapeRegExp(control.property)}:\\s*([^;]+)`, "i");
+    const propertyMatch = block.match(propertyRegex);
+
+    if (!propertyMatch) return control.default || 0;
+
+    const rawValue = propertyMatch[1].trim().replace(/\s*!important\s*$/i, "").trim();
+
+    if (control.filter) {
+        const filterMatch = rawValue.match(new RegExp(`${escapeRegExp(control.filter)}\\(\\s*([\\d\\.]+)(deg|px)?\\s*\\)`, "i"));
+        return filterMatch ? filterMatch[1] : (control.default || 0);
+    }
+
+    const numericMatch = rawValue.match(/^([\d\.]+)/);
+    return numericMatch ? numericMatch[1] : (control.default || 0);
+}
+
+function updateSliderValueInCSS(control, value, cssText = editor.value) {
+    const selectorEscaped = escapeRegExp(control.selector || "");
+    const propertyRegex = new RegExp(`(${selectorEscaped}\\s*\\{[^}]*?${escapeRegExp(control.property)}:\\s*)([^;]+?)(\\s*!important)?\\s*;`, "i");
+
+    return cssText.replace(propertyRegex, (fullMatch, prefix, existingValue, importantFlag) => {
+        let nextValue = existingValue.trim().replace(/\s*!important\s*$/i, "").trim();
+
+        if (control.filter) {
+            const filterRegex = new RegExp(`${escapeRegExp(control.filter)}\\(\\s*[\\d\\.]+(?:deg|px)?\\s*\\)`, "i");
+            const unit = getSliderUnit(control);
+
+            if (filterRegex.test(nextValue)) {
+                nextValue = nextValue.replace(filterRegex, `${control.filter}(${value}${unit})`);
+            } else {
+                nextValue = `${control.filter}(${value}${unit})`;
+            }
+        } else {
+            nextValue = `${value}${getSliderUnit(control)}`;
+        }
+
+        return `${prefix}${nextValue}${importantFlag || ""};`;
+    });
+}
+
 function createSlider(control, regex) {
     const wrapper = document.createElement("div");
     const label = document.createElement("label");
@@ -534,17 +589,15 @@ function createSlider(control, regex) {
     slider.max = control.max;
     slider.step = control.step;
     
-    const match = editor.value.match(regex);
-    slider.value = match ? match[1] : control.default;
+    slider.value = getSliderValueFromCSS(control, editor.value);
 
     const valueLabel = document.createElement("span");
-    valueLabel.textContent = slider.value + control.unit;
+    const sliderUnit = getSliderUnit(control);
+    valueLabel.textContent = `${slider.value}${sliderUnit}`;
 
     slider.addEventListener("input", () => {
-        valueLabel.textContent = slider.value + control.unit;
-        
-        const replaceRegex = new RegExp(`(${control.selector.replace('.', '\\.')}\\s*{[^}]*${control.property}:\\s*)([\\d\\.]+)`);
-        editor.value = editor.value.replace(replaceRegex, `$1${slider.value}`);
+        valueLabel.textContent = `${slider.value}${sliderUnit}`;
+        editor.value = updateSliderValueInCSS(control, slider.value, editor.value);
         liveStyle.textContent = editor.value;
     });
 
@@ -563,13 +616,13 @@ function syncControlsFromCSS() {
         const { type, regex, slider, valueLabel, control, input } = item;
 
         if (type === "slider") {
-    const match = editor.value.match(regex);
+    const currentValue = getSliderValueFromCSS(control, editor.value);
 
-    if (match && match[1]) {
-        slider.value = match[1];
+    if (currentValue !== undefined) {
+        slider.value = currentValue;
 
         if (valueLabel) {
-            valueLabel.textContent = slider.value + (control.unit || "");
+            valueLabel.textContent = `${slider.value}${getSliderUnit(control)}`;
         }
     }
 }
