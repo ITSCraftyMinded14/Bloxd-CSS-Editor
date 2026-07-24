@@ -1,0 +1,30 @@
+[
+  {
+  "group": "Links:",
+  "type": "link",
+  "label": "Use Online Images:",
+  "text": "Freeimage Host",
+  "link": "https://freeimage.host"
+  },
+
+  {
+  "group": "Layout:",
+  "selector": ".HomePageBackgroundContainer",
+  "type": "image",
+  "label": "Background",
+  "property": "background-image",
+  "unit": "url"
+  },
+
+  {
+    "group":"Effects:",
+    "selector": ".HomePageBackgroundContainer",
+    "type": "slider",
+    "label": "Background Blur",
+    "property": "filter",
+    "filter": "blur",
+    "min": 0,
+    "max": 10,
+    "step": 1
+  }
+]
