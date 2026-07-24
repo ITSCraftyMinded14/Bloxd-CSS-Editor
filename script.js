@@ -72,9 +72,9 @@ let originalCSS = "";
 
 async function loadPreset(name) {
 
-    const htmlResponse = await fetch(`https://cdn.jsdelivr.net/gh/ITSCraftyMinded14/Bloxd-CSS-Editor@25165c4d63c3eaf236445df0948c99cc23e22bd9/components/${name}.html`);
-    const cssResponse = await fetch(`https://cdn.jsdelivr.net/gh/ITSCraftyMinded14/Bloxd-CSS-Editor@25165c4d63c3eaf236445df0948c99cc23e22bd9/css/${name}.css`);
-    const jsonResponse = await fetch(`https://cdn.jsdelivr.net/gh/ITSCraftyMinded14/Bloxd-CSS-Editor@25165c4d63c3eaf236445df0948c99cc23e22bd9/json/${name}.json`);
+    const htmlResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@d663a442ed322c02b76c3b7e87a7c72c875e8daf/components/${name}.html`);
+    const cssResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@d663a442ed322c02b76c3b7e87a7c72c875e8daf/css/${name}.css`);
+    const jsonResponse = await fetch(`https://cdn.jsdelivr.net/gh/1Crafty/Bloxd-CSS-Editor@d663a442ed322c02b76c3b7e87a7c72c875e8daf/json/${name}.json`);
     const html = await htmlResponse.text();
     const css = await cssResponse.text();
     const config = await jsonResponse.json();
